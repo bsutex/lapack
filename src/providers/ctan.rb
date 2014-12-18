@@ -39,18 +39,20 @@ module LaPack
       JSON.parse(LaPack.gets(@package_info % package), symbolize_names: true)
     end
 
-    def install(*packages)
+    def install(to_dir, *packages)
       packages.each do |package|
+        LaPack.log("Installing #{package.blue.bold}")
         if list.select{|p| p[:name].eql?(package)}.empty?
-          log("No such package #{package}", :error)
+          raise ("No such package #{package}")
         else
-          install_package(package)
+          install_package(package, to_dir)
         end
       end
     end
 
     private
-    def install_package(package)
+    def install_package(package, to_dir)
+
       package_dir = File.join(@packages, package)
 
       FileUtils.mkdir_p(package_dir)
@@ -73,7 +75,7 @@ module LaPack
       end
 
       Dir["#{package_dir}/*.sty"].each do |sty|
-        FileUtils.ln_s(sty, '.')
+        FileUtils.ln_s(sty, to_dir, force: true)
       end
     end
 

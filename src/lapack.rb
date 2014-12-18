@@ -81,7 +81,13 @@ module LaPack
   end
 
   def LaPack.install(db, *packages)
-    LENV.db(db).install(*packages)
+    if File.directory?(packages.last)
+      to_dir = packages.last
+      packages = packages[0..(packages.length - 2)]
+      LENV.db(db).install(to_dir, *packages)
+    else
+      LENV.db(db).install('.', *packages)
+    end
   end
 
   def LaPack.update(*dbnames)
