@@ -1,10 +1,20 @@
+#!/usr/bin/env ruby
 require 'open-uri'
 require 'fileutils'
 require 'colorize'
 require 'json'
 
-require './laconf'
 
+def real(path)
+  while(File.symlink?(path))
+    path = File.readlink(path)
+  end
+  path
+end
+
+ENV['LAPACK'] = File.dirname(File.realpath(__FILE__))
+
+require "#{ENV['LAPACK']}/laconf"
 
 module LaPack
 
@@ -110,7 +120,10 @@ module LaPack
   end
 end
 
-
-LaPack.send(ARGV[0], *ARGV[1..ARGV.length])
+if (ARGV.empty?)
+  puts "No args passed"
+else
+  LaPack.send(ARGV[0], *ARGV[1..ARGV.length])
+end
 
 
