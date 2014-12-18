@@ -18,11 +18,12 @@ module LaPack
       @packages = File.join(dbdir, 'pkg')
       # Package index
       @index = File.join(dbdir, "#{@name}.json")
+      # Ctan archive fetch
+      @ctan_fetch = 'http://mirrors.ctan.org%s'
 
       FileUtils.mkdir_p(@packages) unless File.exists?(@packages)
 
       raise "Can't write to #{@packages}. Not a directory" unless File.directory?(@packages)
-
     end
 
     def update
@@ -32,6 +33,63 @@ module LaPack
     def list
       raise "Update db first" unless File.exists?(@index)
       File.open(@index, "r") {|f| JSON.parse(f.read, symbolize_names: true)}
+    end
+
+    def show(package)
+      JSON.parse(LaPack.gets(@package_info % package), symbolize_names: true)
+    end
+
+    def install(*packages)
+      packages.each do |package|
+        if list.select{|p| p[:name].eql?(package)}.empty?
+          log("No such package #{package}", :error)
+        else
+          install_package(package)
+        end
+      end
+    end
+
+    private
+    def install_package(package)
+      package_dir = File.join(@packages, package)
+
+      FileUtils.mkdir_p(package_dir)
+
+      stys = []
+      Dir.mktmpdir("lapack-#{package}-") do |tmp|
+        package_info = show(package)
+        if package_info.has_key?(:ctan)
+          stys = ctan_install(package_info, tmp)
+        elsif package_info.has_key?(:install)
+          LaPack.log("Build from :install")
+        elsif package_info.has_key?(:texlive)
+          LaPack.log("Build from :texlive")
+        else
+          raise("Don't know how to build #{package}")
+        end
+
+
+        stys.each{|sty| FileUtils.cp(sty, package_dir)}
+      end
+
+      Dir["#{package_dir}/*.sty"].each do |sty|
+        FileUtils.ln_s(sty, '.')
+      end
+    end
+
+    def ctan_install(package_info, tmpdir)
+      link = (@ctan_fetch % package_info[:ctan][:path]) + ".zip"
+      arch = File.join(tmpdir, "#{package_info[:name]}.zip")
+      LaPack.get(link, arch)
+      `unzip #{arch} -d #{File.join(tmpdir, "src")}`
+      Dir["#{tmpdir}/**/*.ins"].each do |ins|
+        Dir.chdir(File.dirname(ins)) do |dir|
+          LaPack.log("LaTex on #{ins}")
+          system "latex #{ins}"
+        end
+      end
+
+      Dir["#{tmpdir}/**/*.sty"]
     end
   end
 end

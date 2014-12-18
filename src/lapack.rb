@@ -1,9 +1,10 @@
 #!/usr/bin/env ruby
+
 require 'open-uri'
 require 'fileutils'
 require 'colorize'
 require 'json'
-
+require 'tmpdir'
 
 def real(path)
   while(File.symlink?(path))
@@ -15,14 +16,9 @@ end
 
 ENV['LAPACK'] = File.dirname(File.realpath(__FILE__))
 
-puts ENV['LAPACK']
-
-
 require "#{ENV['LAPACK']}/laconf"
 require "#{ENV['LAPACK']}/providers/provider"
 require "#{ENV['LAPACK']}/providers/ctan"
-
-
 
 module LaPack
   LENV.dbs_init
@@ -72,7 +68,6 @@ module LaPack
   ##
   # Add db by name if supported
   #
-  #
   def LaPack.add_db(name, args = {})
     LENV.add(name.to_s, args) unless !LENV.supports?(name)
   end
@@ -94,6 +89,11 @@ module LaPack
       LENV.db(dbname).update
     end
 
+  end
+
+
+  def LaPack.show(db, package)
+    puts JSON.pretty_generate(LENV.db(db).show(package))
   end
 end
 

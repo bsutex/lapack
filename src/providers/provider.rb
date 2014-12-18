@@ -62,5 +62,9 @@ module LaPack
     def install(*packages)
       puts "Dummy implementation. Should install: #{packages.join(",")}"
     end
+
+    def show(package)
+      []
+    end
   end
 end
