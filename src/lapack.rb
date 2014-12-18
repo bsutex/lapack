@@ -9,14 +9,23 @@ def real(path)
   while(File.symlink?(path))
     path = File.readlink(path)
   end
+
   path
 end
 
 ENV['LAPACK'] = File.dirname(File.realpath(__FILE__))
 
+puts ENV['LAPACK']
+
+
 require "#{ENV['LAPACK']}/laconf"
+require "#{ENV['LAPACK']}/providers/provider"
+require "#{ENV['LAPACK']}/providers/ctan"
+
+
 
 module LaPack
+  LENV.dbs_init
 
   LOG_LEVELS = {
     warning: "*\t%s".light_red,
@@ -39,84 +48,52 @@ module LaPack
     open(url).read
   end
 
-  ### Обновить базы по и
-  def LaPack.update_db(dbs)
-    dbs.each do |db|
-      log("Updating #{db[:name].white.bold}") unless LENV.quiet?
-      get(db[:source], db[:store])
-    end
-  end
-
+  ##
+  # List available packages for +dbs+
+  #
   def LaPack.list(*dbs)
     if dbs.length == 1 && dbs.first.eql?("all")
       # TODO:
       log("`all` unsupported yet", :warning)
     else
+
       dbs.each do |dbname|
-        installed = Dir["#{File.join(LENV.dbs, dbname, LENV.lapkg)}/**"]
-        db_index = []
-        File.open(File.join(LENV.dbs, "#{dbname}.db", "#{dbname}.json")) {|f| db_index = JSON.parse(f.read, symbolize_names: true)}
-        db_index.each do |entry|
+        LENV.db(dbname).list.each do |entry|
           printf("%#{-60}s %s\n", "#{dbname.magenta}/#{entry[:name].magenta.bold}", "#{entry[:caption].blue.bold}")
         end
+        puts
+        puts
       end
+
     end
+
   end
 
-  ### Добавить базу данных
-  ## Используя
-  ## name - имя
-  ## index_uri - путь к индексу пакетов.
   ##
-  ## TODO: Быбло бы неплохо использовать какую-либо схему для индекса. Сейчас используем структуру CTAN
-  def LaPack.add_db(name, index_uri, args = {})
-    # Создадим хранилище если еще не создано
-    FileUtils.mkdir_p(LENV.dbs) unless File.exists?(LENV.dbs)
-
-    # Файл описывающий базу
-    db_file = File.join(LENV.dbs, name)
-
-    # Если такой файл уже есть, то извините
-    if(File.exists?(db_file) && !args[:force])
-      log("#DB #{name} already exists, use --force flag to overwrite", :error)
-    else
-      File.open(db_file, "w") do |desc|
-        # Пока у нас только имя и путь к индексу. Индекс может быть локальным, никаких проблем.
-        desc << {
-            name: name,
-            source: index_uri,
-            store: File.join(LENV.dbs,"#{name}.db", "#{name}.json")
-          }.to_json
-      end
-    end
+  # Add db by name if supported
+  #
+  #
+  def LaPack.add_db(name, args = {})
+    LENV.add(name.to_s, args) unless !LENV.supports?(name)
   end
 
   def LaPack.log(string, level = :info)
     puts LOG_LEVELS[level] % string
   end
 
-  def LaPack.add(db, index_uri, args={})
-    add_db(db, index_uri, args={})
+  def LaPack.add(db, args={})
+    add_db(db, args={})
   end
 
-  def LaPack.install(db, package)
-
+  def LaPack.install(db, *packages)
+    LENV.db(db).install(*packages)
   end
 
   def LaPack.update(*dbnames)
     dbnames.each do |dbname|
-      if (dbname.to_s.eql? "all")
-        #TODO:
-        log("`all` unsupported yet", :warning)
-      else
-        if (File.exists?(File.join(LENV.dbs, dbname)))
-          json = ""
-          File.open(File.join(LENV.dbs, dbname), "r") {|f| json = f.read}
-          FileUtils.mkdir_p(File.join(LENV.dbs, "#{dbname}.db"))
-          update_db([JSON.parse(json, symbolize_names: true)])
-        end
-      end
+      LENV.db(dbname).update
     end
+
   end
 end
 
