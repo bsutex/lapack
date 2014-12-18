@@ -3,6 +3,9 @@ lapack
 
 Simple packaging tool for latex
 
+## Dependencies
+  Currently for Ruby you need
+  * colorize 
 
 ## Installation
 Current installation process is to copy source files to /opt directory and create link to lapack.rb @ `/usr/local/bin.`
