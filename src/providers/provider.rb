@@ -17,7 +17,7 @@ module LaPack
       @name = name
 
       # Check if db dir exists
-      @dbdir = File.join(env.dbs, name)
+      @dbdir = File.join(env.dbs_store, name)
       if File.exists?(@dbdir)
         raise "Can't write to #{@dbdir}. Not a directory" unless File.directory?(@dbdir)
       else

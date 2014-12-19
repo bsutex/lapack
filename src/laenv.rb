@@ -1,4 +1,8 @@
 module LaPack
+  ##
+  # Enviroment class for lapack.
+  # Defines runtime options
+  #
   class LaEnv
 
     attr_reader(:lastore, :ladb, :lapkg)
@@ -8,7 +12,7 @@ module LaPack
       @lastore = File.expand_path(args.delete(:lastore)|| "~/.config/lapack")
       @ladb = "db"
       @lapkg = "pkg"
-      FileUtils.mkdir_p(dbs)
+      FileUtils.mkdir_p(dbs_store)
 
       raise "Unknown args #{args.keys.join(', ')}" unless args.keys.empty?
     end
@@ -17,7 +21,10 @@ module LaPack
       @quiet
     end
 
-    def dbs
+    ##
+    # Returns dbs path
+    #
+    def dbs_store
       File.join(@lastore, ladb)
     end
 
@@ -25,9 +32,13 @@ module LaPack
       @dbs_hash[name.to_sym]
     end
 
+    def dbs
+      @dbs_hash.keys
+    end
+
     def add(db, params = {})
       if(db.to_sym.eql?(:ctan))
-        File.open(File.join(dbs, "#{db}.db"), "w") {|f| f << {name: 'ctan', clazz: 'CtanProvider', params: {}}.to_json}
+        File.open(File.join(dbs_store, "#{db}.db"), "w") {|f| f << {name: 'ctan', clazz: 'CtanProvider', params: {}}.to_json}
       else
         raise "Unsupported"
       end
@@ -38,19 +49,17 @@ module LaPack
     end
 
     def dbs_init
-       @dbs_hash = Dir["#{dbs}/*.db"]
-        .map do |dbfile|
-          File.open(dbfile){|f| JSON.parse(f.read, symbolize_names: true)}
-        end
-        .inject({}) do |h, db|
-          h.update({
-            db[:name].to_sym => LaPack::const_get(db[:clazz]).new(self, db[:params])
-          })
-        end
+      @dbs_hash = Dir["#{dbs_store}/*.db"]
+      .map do |dbfile|
+        File.open(dbfile){|f| JSON.parse(f.read, symbolize_names: true)}
+      end
+      .inject({}) do |h, db|
+        h.update({
+          db[:name].to_sym => LaPack::const_get(db[:clazz]).new(self, db[:params])
+        })
+      end
     end
   end
 
   LENV = LaEnv.new
-
-
 end

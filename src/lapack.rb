@@ -1,26 +1,30 @@
 #!/usr/bin/env ruby
 
+# Provides download uri functionality
 require 'open-uri'
+# Utils for linking, copying, removing files
 require 'fileutils'
+
+# Color output to console
+# TODO: If not installed replace with fake mixin.
 require 'colorize'
+
+# JSON parsing and generation
 require 'json'
+
+# Provides methods for working with temp dirs
 require 'tmpdir'
-
-def real(path)
-  while(File.symlink?(path))
-    path = File.readlink(path)
-  end
-
-  path
-end
 
 ENV['LAPACK'] = File.dirname(File.realpath(__FILE__))
 
-require "#{ENV['LAPACK']}/laconf"
+require "#{ENV['LAPACK']}/laenv"
 require "#{ENV['LAPACK']}/providers/provider"
 require "#{ENV['LAPACK']}/providers/ctan"
 
+
+
 module LaPack
+  # Init dbs structure
   LENV.dbs_init
 
   LOG_LEVELS = {
@@ -52,7 +56,8 @@ module LaPack
       # TODO:
       log("`all` unsupported yet", :warning)
     else
-
+      # TODO: More sofisticated pretty pring
+      # TODO: assuming we had json like structure
       dbs.each do |dbname|
         LENV.db(dbname).list.each do |entry|
           printf("%#{-60}s %s\n", "#{dbname.magenta}/#{entry[:name].magenta.bold}", "#{entry[:caption].blue.bold}")
@@ -60,9 +65,7 @@ module LaPack
         puts
         puts
       end
-
     end
-
   end
 
   ##
@@ -72,14 +75,27 @@ module LaPack
     LENV.add(name.to_s, args) unless !LENV.supports?(name)
   end
 
+  ##
+  # Logging method
+  # TODO: Remove from LaPack module. Move to utils.rb
   def LaPack.log(string, level = :info)
-    puts LOG_LEVELS[level] % string
+    puts LOG_LEVELS[level] % string unless LENV.quiet? # Do not print anything if quiet
   end
 
+  ##
+  # Add db to local repo. Creates needed structure @ ~/.config/lapack/db
+  #
   def LaPack.add(db, args={})
     add_db(db, args={})
   end
 
+  ##
+  # Install packages.
+  # If last argument from packages list is directory
+  #   install all packages to directory
+  # else
+  #   install to current working dir
+  #
   def LaPack.install(db, *packages)
     if File.directory?(packages.last)
       to_dir = packages.last
@@ -90,14 +106,25 @@ module LaPack
     end
   end
 
+  ##
+  # Fetch package index for +dbnames+
+  #
   def LaPack.update(*dbnames)
     dbnames.each do |dbname|
       LENV.db(dbname).update
     end
-
   end
 
+  ##
+  # Show installed dbs
+  #
+  def LaPack.dbs
+    log("Currently plugged dbs:")
+    log(LENV.dbs.map{|d| "\t* %s".white.bold % d}.join("\n"), :plain)
+  end
 
+  ##
+  # Show package info for +package+ from +db+
   def LaPack.show(db, package)
     puts JSON.pretty_generate(LENV.db(db).show(package))
   end
@@ -108,5 +135,3 @@ if (ARGV.empty?)
 else
   LaPack.send(ARGV[0], *ARGV[1..ARGV.length])
 end
-
-
