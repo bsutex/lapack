@@ -16,6 +16,7 @@ Running `sudo rake install` will do the job.
 * `lapack add %reponame%` - adds repo to your repos list
 * `lapack list %reponame%` - lists all packages  in repo. No filters yet. `grep` is your friend :)
 * `lapack install %reponame% %packagename%... [%dirname%]` - install packages with `packagename` from repo with `reponame` to directory `%dirname%` (if specifyed). Directory must be created
+* `lapack dbs` - list currently plugged dbs
 
 ## Roadmap
   * git recipes support
