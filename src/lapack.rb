@@ -17,6 +17,8 @@ require 'tmpdir'
 
 ENV['LAPACK'] = File.dirname(File.realpath(__FILE__))
 
+DEBUG = false
+
 require "#{ENV['LAPACK']}/laenv"
 require "#{ENV['LAPACK']}/providers/provider"
 require "#{ENV['LAPACK']}/providers/ctan"
@@ -97,9 +99,12 @@ module LaPack
   #   install to current working dir
   #
   def LaPack.install(db, *packages)
+    raise "Empty package list" unless !packages.last.nil? # No packages specified at all
+
     if File.directory?(packages.last)
       to_dir = packages.last
       packages = packages[0..(packages.length - 2)]
+
       LENV.db(db).install(to_dir, *packages)
     else
       LENV.db(db).install('.', *packages)
@@ -133,5 +138,12 @@ end
 if (ARGV.empty?)
   puts "No args passed"
 else
-  LaPack.send(ARGV[0], *ARGV[1..ARGV.length])
+  begin
+    LaPack.send(ARGV[0], *ARGV[1..ARGV.length])
+  rescue NoMethodError => undefined
+    puts "Unknown operation #{undefined.name}"
+  rescue Exception => e
+    puts e
+    puts $!.backtrace if DEBUG
+  end
 end

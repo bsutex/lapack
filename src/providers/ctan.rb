@@ -43,7 +43,7 @@ module LaPack
       packages.each do |package|
         LaPack.log("Installing #{package.blue.bold}")
         if list.select{|p| p[:name].eql?(package)}.empty?
-          raise ("No such package #{package}")
+          raise "No such package #{package.white.bold}"
         else
           install_package(package, to_dir)
         end
