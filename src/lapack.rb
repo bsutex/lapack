@@ -133,6 +133,15 @@ module LaPack
   def LaPack.show(db, package)
     puts JSON.pretty_generate(LENV.db(db).show(package))
   end
+
+
+  ##
+  # Remove packages from store
+  def LaPack.remove(db, *packages)
+    raise "Empty package list" unless !packages.last.nil? # No packages specified at all
+
+    LENV.db(db).remove(*packages)
+  end
 end
 
 if (ARGV.empty?)

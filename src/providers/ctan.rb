@@ -50,6 +50,17 @@ module LaPack
       end
     end
 
+    def remove(*packages)
+      packages.each do |package|
+        LaPack.log("Removing #{package.blue.bold}")
+        if list.select{|p| p[:name].eql?(package)}.empty?
+          raise "No such package #{package.white.bold}"
+        else
+          ctan_remove(package)
+        end
+      end
+    end
+
     private
     ##
     # Install package routine
@@ -120,6 +131,11 @@ module LaPack
       end
       # Return list of *.sty
       Dir["#{tmpdir}/**/*.sty"]
+    end
+
+    def ctan_remove(package)
+       package_dir = File.join(@packages, package)
+       FileUtils.rm_r(package_dir)
     end
   end
 end
