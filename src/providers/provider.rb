@@ -3,6 +3,7 @@ require 'fileutils'
 module LaPack
   ##
   # Base package provider. I.e. database wrapper.
+  #
   # Should know how to:
   # * fetch packages index and manage
   # * show package info
@@ -47,14 +48,12 @@ module LaPack
 
     ##
     # Updates package index
-    #
     def update
       true
     end
 
     ##
     # Shows available packages
-    #
     def list
       return []
     end
@@ -65,6 +64,10 @@ module LaPack
 
     def show(package)
       []
+    end
+
+    def remove(package)
+      # do nothing
     end
   end
 end
