@@ -39,13 +39,15 @@ module LaPack
     def add(db, params = {})
       if(db.to_sym.eql?(:ctan))
         File.open(File.join(dbs_store, "#{db}.db"), "w") {|f| f << {name: 'ctan', clazz: 'CtanProvider', params: {}}.to_json}
+      elsif (db.to_sym.eql?(:github))
+        File.open(File.join(dbs_store, "#{db}.db"), "w") {|f| f << {name: 'github', clazz: 'GithubProvider', params: {}}.to_json}
       else
         raise "Unsupported"
       end
     end
 
     def supports?(dbtype)
-      :ctan.eql? dbtype.to_sym
+      (:ctan.eql? dbtype.to_sym) || (:github.eql? dbtype.to_sym)
     end
 
     def dbs_init

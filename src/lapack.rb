@@ -17,11 +17,12 @@ require 'tmpdir'
 
 ENV['LAPACK'] = File.dirname(File.realpath(__FILE__))
 
-DEBUG = false
+DEBUG = true
 
 require "#{ENV['LAPACK']}/laenv"
 require "#{ENV['LAPACK']}/providers/provider"
 require "#{ENV['LAPACK']}/providers/ctan"
+require "#{ENV['LAPACK']}/providers/github"
 
 
 
