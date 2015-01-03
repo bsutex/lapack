@@ -45,11 +45,11 @@ module LaPack
     end
 
     def list
-      log("Unavailable", :warning)
+      LaPack.log("Unavailable", :warning)
     end
 
     def show(package)
-      log("Unavailable", :warning)
+      LaPack.log("Unavailable", :warning)
     end
 
     def install(to_dir, *packages)
