@@ -16,6 +16,10 @@ Then you can install gem by
 
 `gem install out/lapack-0.0.1.gem`
 
+Or alternativly you can install latest version directly from rubygems.org
+
+`gem install lapack`
+
 ## Usage
 
 * `lapack add %reponame%` - adds repo to your repos list
