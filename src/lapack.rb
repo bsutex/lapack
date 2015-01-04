@@ -17,6 +17,9 @@ require 'tmpdir'
 
 ENV['LAPACK'] = File.dirname(File.realpath(__FILE__))
 
+##
+# Check if we in debug mode or not
+#
 DEBUG = true
 
 require "laenv"
@@ -37,15 +40,17 @@ module LaPack
     plain: "%s"
   }
 
-  ### Получаем файл по url и складываем его по имени файла
-  ## url - вообще говоря uri
-  ## dst - путь к файлу, в который записываем
-  ## laenv - окружение, в котором работаем
+  ##
+  # Get data from +url+ and save it to +dst+
+  #
   def LaPack.get(url, dst)
     log("Fetching #{url.white.bold} to #{dst.white.bold}")
     File.open(dst, "w"){|f| f << LaPack.gets(url)}
   end
 
+  ##
+  # Get data from +url+ and return it as string
+  #
   def LaPack.gets(url)
     open(url).read
   end
@@ -80,6 +85,7 @@ module LaPack
   ##
   # Logging method
   # TODO: Remove from LaPack module. Move to utils.rb
+  #
   def LaPack.log(string, level = :info)
     puts LOG_LEVELS[level] % string unless LENV.quiet? # Do not print anything if quiet
   end
@@ -94,9 +100,8 @@ module LaPack
   ##
   # Install packages.
   # If last argument from packages list is directory
-  #   install all packages to directory
-  # else
-  #   install to current working dir
+  # install all packages to directory
+  # else install to current working dir
   #
   def LaPack.install(db, *packages)
     raise "Empty package list" unless !packages.last.nil? # No packages specified at all

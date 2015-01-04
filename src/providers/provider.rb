@@ -54,18 +54,28 @@ module LaPack
 
     ##
     # Shows available packages
+    #
     def list
       return []
     end
 
+    ##
+    # Install each package from +packages+
+    #
     def install(*packages)
       puts "Dummy implementation. Should install: #{packages.join(",")}"
     end
 
+    ##
+    # Show +package+ details
+    #
     def show(package)
       []
     end
 
+    ##
+    # Delete package from local store
+    #
     def remove(package)
       # do nothing
     end

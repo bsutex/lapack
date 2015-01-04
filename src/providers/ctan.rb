@@ -1,7 +1,15 @@
 module LaPack
 
+  ##
+  # Provider for packages from ctan.org
+  #
   class CtanProvider < Provider
 
+    ##
+    # Create new Ctan instance.
+    #
+    # No special params expected
+    #
     def initialize(env, params = {})
       super env, 'ctan', params
 
@@ -11,6 +19,9 @@ module LaPack
       @package_info = 'http://ctan.org/json/pkg/%s'
     end
 
+    ##
+    # Basic initialization of CtanProvider instance
+    #
     def init(dbdir)
       # dbdir path
       @dbdir = dbdir
@@ -26,19 +37,37 @@ module LaPack
       raise "Can't write to #{@packages}. Not a directory" unless File.directory?(@packages)
     end
 
+    ##
+    # Update package index
+    #
+    # This will download newer version of package list from ctan.org
+    #
     def update
       LaPack.get(@package_list, @index)
     end
 
+    ##
+    # List packages from ctan archive
+    #
     def list
       raise "Update db first" unless File.exists?(@index)
       File.open(@index, "r") {|f| JSON.parse(f.read, symbolize_names: true)}
     end
 
+    ##
+    # Show package details
+    #
     def show(package)
       JSON.parse(LaPack.gets(@package_info % package), symbolize_names: true)
     end
 
+    ##
+    # Create links for +packages+ at +to_dir+
+    #
+    # If any package not installed, it will be installed after running this command
+    #
+    # TODO: Dry run (no linking just installation) will be implemented
+    #
     def install(to_dir, *packages)
       packages.each do |package|
         LaPack.log("Installing #{package.blue.bold}")
@@ -50,7 +79,9 @@ module LaPack
       end
     end
 
-
+    ##
+    # Remove +packages+ from ctan storage
+    #
     def remove(*packages)
       packages.each do |package|
         LaPack.log("Removing #{package.blue.bold}")
