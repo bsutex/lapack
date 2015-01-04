@@ -19,17 +19,16 @@ ENV['LAPACK'] = File.dirname(File.realpath(__FILE__))
 
 DEBUG = true
 
-require "#{ENV['LAPACK']}/laenv"
-require "#{ENV['LAPACK']}/providers/provider"
-require "#{ENV['LAPACK']}/providers/ctan"
-require "#{ENV['LAPACK']}/providers/github"
-
+require "laenv"
+require "providers/provider"
+require "providers/ctan"
+require "providers/github"
 
 
 module LaPack
   # Init dbs structure
   LENV.dbs_init
-
+  # TODO: Move in latools or lacore
   LOG_LEVELS = {
     warning: "*\t%s".light_red,
     info:  "*\t".yellow.bold + "%s".blue.bold,

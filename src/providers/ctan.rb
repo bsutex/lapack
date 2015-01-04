@@ -50,6 +50,7 @@ module LaPack
       end
     end
 
+
     def remove(*packages)
       packages.each do |package|
         LaPack.log("Removing #{package.blue.bold}")
