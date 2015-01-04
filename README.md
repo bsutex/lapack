@@ -7,9 +7,14 @@ Simple packaging tool for **_LaTeX_**
   Sometimes we need *.sty files just in place. So lapack is tool for managing versioned local *.sty files.
 
 ## Installation
-Current installation process is to copy source files to /opt directory and create link to lapack.rb @ `/usr/local/bin.`
 
-Running `sudo rake install` will do the job.
+To build gem run
+
+`rake gem`
+
+Then you can install gem by
+
+`gem install out/lapack-0.0.1.gem`
 
 ## Usage
 
