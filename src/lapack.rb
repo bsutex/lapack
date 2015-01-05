@@ -20,12 +20,20 @@ ENV['LAPACK'] = File.dirname(File.realpath(__FILE__))
 ##
 # Check if we in debug mode or not
 #
-DEBUG = true
+DEBUG = false
 
-require "laenv"
-require "providers/provider"
-require "providers/ctan"
-require "providers/github"
+##
+# Current version
+#
+Version = [0, 0, 2]
+
+def lareq path
+  require (DEBUG ? File.join(ENV['LAPACK'], path) : path)
+end
+
+lareq "laenv"
+lareq "providers/provider"
+lareq "providers/ctan"
 
 
 module LaPack
@@ -149,11 +157,64 @@ module LaPack
   end
 end
 
+require 'optparse'
+require 'optparse/time'
+require 'ostruct'
+require 'pp'
+
+class Args
+
+
+
+  #
+  # Return a structure describing the options.
+  #
+  def self.parse(args)
+    # The options specified on the command line will be collected in *options*.
+    # We set default values here.
+    options = OpenStruct.new
+    options.command
+    opt_parser = OptionParser.new do |opts|
+      opts.banner = "Usage: lapack [command] [command_args]..."
+
+      opts.separator ""
+      opts.separator "Commands:"
+      opts.separator "\t add [reponame] -- add repository. Currently supported: ctan"
+      opts.separator "\t update [reponame] -- update repository index."
+      opts.separator "\t install [reponame] [package]... [to_dir] -- install packages from repository to specified directory. If no directory specified use current working dir"
+      opts.separator "\t remove [reponame] [package]... -- remove packages from local cache"
+      opts.separator ""
+      opts.separator "Specific options:"
+
+      # No argument, shows at tail.  This will print an options summary.
+      # Try it and see!
+      opts.on_tail("-h", "--help", "Show this message") do
+        puts opts
+        exit
+      end
+
+      # Another typical switch to print the version.
+      opts.on_tail("--version", "Show version") do
+        puts Version.join('.')
+        exit
+      end
+    end
+
+    opt_parser.parse!(args)
+    options
+  end  # parse()
+
+end  # class Args
+
+
+
 if (ARGV.empty?)
   puts "No args passed"
 else
+  options = Args.parse(ARGV)
+
   begin
-    LaPack.send(ARGV[0], *ARGV[1..ARGV.length])
+    LaPack.send(ARGV[0], *ARGV[1..ARGV.length]) unless ARGV.empty?
   rescue NoMethodError => undefined
     puts "Unknown operation #{undefined.name}"
   rescue Exception => e

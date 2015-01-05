@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'lapack'
-  s.version     = '0.0.1'
+  s.version     = '0.0.2'
   s.date        = '2015-01-04'
   s.summary     = "LaPack"
   s.executable  = "lapack"
@@ -8,6 +8,6 @@ Gem::Specification.new do |s|
   s.authors     = ["Ilya Arkhanhelsky"]
   s.email       = 'ilya.arkhanhelsky@gmail.com'
   s.files       = Dir['lib/**/*.rb']
-  s.homepage    = 'http://rubygems.org/gems/lapack'
+  s.homepage    = 'http://github.com/bsutex/lapack'
   s.license       = 'Apache'
 end
