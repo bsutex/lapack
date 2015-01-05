@@ -2,6 +2,7 @@ lapack
 ======
 
 Simple packaging tool for **_LaTeX_**
+[![Gem Version](https://badge.fury.io/rb/lapack.svg)](http://badge.fury.io/rb/lapack)
 
 ## Motivation
   Sometimes we need *.sty files just in place. So lapack is tool for managing versioned local *.sty files.
